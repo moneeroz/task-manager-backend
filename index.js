@@ -1,8 +1,9 @@
-const express = require('express');
+const express = require("express");
+const { v4: uuidv4 } = require("uuid");
 const app = express();
-const config = require('./config');
-const Task = require('./models/task');
-const cors = require('cors');
+const config = require("./config");
+const Task = require("./models/task");
+const cors = require("cors");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -11,14 +12,14 @@ app.use(cors());
 config
   .authenticate()
   .then(() => {
-    console.log('Databae is connected');
+    console.log("Databae is connected");
   })
   .catch((err) => {
     console.log(err);
   });
 
 // Retrieve all tasks from our DB
-app.get('/tasks', (req, res) => {
+app.get("/tasks", (req, res) => {
   Task.findAll()
     .then((results) => {
       res.status(200).send(results);
@@ -29,10 +30,26 @@ app.get('/tasks', (req, res) => {
 });
 
 // Create a new task
-app.post('/tasks', (req, res) => {
-  const taskData = req.body;
+app.post("/tasks", (req, res) => {
+  const id = uuidv4();
+  const {
+    tittle,
+    descreption,
+    catagory,
+    task_date,
+    priority_level,
+    progress_level,
+  } = req.body;
 
-  Task.create(taskData)
+  Task.create(
+    id,
+    tittle,
+    descreption,
+    catagory,
+    task_date,
+    priority_level,
+    progress_level,
+  )
     .then((result) => {
       res.status(200).send(result); // result is the item that was created
     })
@@ -42,7 +59,7 @@ app.post('/tasks', (req, res) => {
 });
 
 // Update task progress level
-app.patch('/tasks/update-progress-level/:task_id', (req, res) => {
+app.patch("/tasks/update-progress-level/:task_id", (req, res) => {
   const taskId = parseInt(req.params.task_id);
 
   // Find the task based on the id
@@ -50,7 +67,7 @@ app.patch('/tasks/update-progress-level/:task_id', (req, res) => {
     .then((result) => {
       // Check if task exists in the database table
       if (!result) {
-        res.status(404).send('Task was not found');
+        res.status(404).send("Task was not found");
         return;
       }
       result.progress_level = req.body.progress_level; // updating the task progress
@@ -70,7 +87,7 @@ app.patch('/tasks/update-progress-level/:task_id', (req, res) => {
 });
 
 // Delete a task
-app.delete('/tasks/:task_id', (req, res) => {
+app.delete("/tasks/:task_id", (req, res) => {
   const taskId = parseInt(req.params.task_id);
 
   // Find the task based on the id
@@ -78,7 +95,7 @@ app.delete('/tasks/:task_id', (req, res) => {
     .then((result) => {
       // Check if task exists in the database table
       if (!result) {
-        res.status(404).send('Task was not found');
+        res.status(404).send("Task was not found");
         return;
       }
 
