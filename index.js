@@ -19,7 +19,7 @@ config
   });
 
 // Retrieve all tasks from our DB
-app.get("/tasks", (req, res) => {
+app.get("/api/tasks", (req, res) => {
   Task.findAll()
     .then((results) => {
       res.status(200).send(results);
@@ -29,27 +29,40 @@ app.get("/tasks", (req, res) => {
     });
 });
 
+// Find a task based on their id
+app.get("/api/tasks/:task_id", (req, res) => {
+  const taskId = req.params.task_id;
+  // Find by primary key
+  Task.findByPk(taskId)
+    .then((result) => {
+      res.status(200).send(result);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+});
+
 // Create a new task
-app.post("/tasks", (req, res) => {
+app.post("/api/tasks", (req, res) => {
   const id = uuidv4();
   const {
-    tittle,
-    descreption,
+    title,
+    description,
     catagory,
     task_date,
     priority_level,
     progress_level,
   } = req.body;
 
-  Task.create(
+  Task.create({
     id,
-    tittle,
-    descreption,
+    title,
+    description,
     catagory,
     task_date,
     priority_level,
     progress_level,
-  )
+  })
     .then((result) => {
       res.status(200).send(result); // result is the item that was created
     })
@@ -59,8 +72,8 @@ app.post("/tasks", (req, res) => {
 });
 
 // Update task progress level
-app.patch("/tasks/update-progress-level/:task_id", (req, res) => {
-  const taskId = parseInt(req.params.task_id);
+app.patch("/api/tasks/update-progress-level/:task_id", (req, res) => {
+  const taskId = req.params.task_id;
 
   // Find the task based on the id
   Task.findByPk(taskId)
@@ -86,9 +99,43 @@ app.patch("/tasks/update-progress-level/:task_id", (req, res) => {
     });
 });
 
+// Complete update of a student record
+app.put("/api/tasks/update-task/:task_id", (req, res) => {
+  const taskId = req.params.task_id;
+  const taskData = req.body;
+  // Find the student
+  Task.findByPk(taskId)
+    .then((result) => {
+      if (!result) {
+        res.status(404).send("Task not found");
+      } else {
+        // Here we are doing a full update but we can do a partial update using PUT
+        result.title = taskData.title;
+        result.description = taskData.description;
+        result.catagory = taskData.catagory;
+        result.task_date = taskData.task_date;
+        result.priority_level = taskData.priority_level;
+        result.progress_level = taskData.progress_level;
+
+        // Save changes to database
+        result
+          .save()
+          .then(() => {
+            res.status(200).send(result);
+          })
+          .catch((err) => {
+            res.status(500).send(err);
+          });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+});
+
 // Delete a task
-app.delete("/tasks/:task_id", (req, res) => {
-  const taskId = parseInt(req.params.task_id);
+app.delete("/api/tasks/:task_id", (req, res) => {
+  const taskId = req.params.task_id;
 
   // Find the task based on the id
   Task.findByPk(taskId)
@@ -114,7 +161,7 @@ app.delete("/tasks/:task_id", (req, res) => {
     });
 });
 
-const PORT = 3030;
+const PORT = 3333;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

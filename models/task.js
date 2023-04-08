@@ -14,7 +14,7 @@ const Task = config.define(
       allowNull: false,
     },
     description: {
-      type: Sequelize.STRING,
+      type: Sequelize.TEXT,
       allowNull: false,
     },
     catagory: {
