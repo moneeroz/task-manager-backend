@@ -5,9 +5,11 @@ const config = require("./config");
 const Task = require("./models/task");
 const cors = require("cors");
 
+// Middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
+
 // Test DB connection
 config
   .authenticate()
@@ -64,7 +66,7 @@ app.post("/api/tasks", (req, res) => {
     progress_level,
   })
     .then((result) => {
-      res.status(200).send(result); // result is the item that was created
+      res.status(200).send(result); // result is the Task that was created
     })
     .catch((err) => {
       res.status(500).send(err);
@@ -99,11 +101,11 @@ app.patch("/api/tasks/update-progress-level/:task_id", (req, res) => {
     });
 });
 
-// Complete update of a student record
+// Complete update of a Task record
 app.put("/api/tasks/update-task/:task_id", (req, res) => {
   const taskId = req.params.task_id;
   const taskData = req.body;
-  // Find the student
+  // Find the Task
   Task.findByPk(taskId)
     .then((result) => {
       if (!result) {
@@ -161,6 +163,7 @@ app.delete("/api/tasks/:task_id", (req, res) => {
     });
 });
 
+// Server
 const PORT = 3333;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
